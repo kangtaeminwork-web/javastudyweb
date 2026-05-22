@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 / 회원가입</title>
+    <style>
+        body { font-family: sans-serif; max-width: 400px; margin: 60px auto; }
+        input { display: block; width: 100%; margin: 8px 0; padding: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; margin-top: 8px; cursor: pointer; }
+        .tab { display: flex; margin-bottom: 16px; }
+        .tab button { background: #eee; border: none; }
+        .tab button.active { background: #333; color: white; }
+        #message { margin-top: 12px; color: red; }
+    </style>
+</head>
+<body>
+<h2>게시판 서비스</h2>
+
+<div class="tab">
+    <button class="active" onclick="showTab('login')">로그인</button>
+    <button onclick="showTab('join')">회원가입</button>
+</div>
+
+<div id="login">
+    <input id="loginUsername" placeholder="아이디" />
+    <input id="loginPassword" type="password" placeholder="비밀번호" />
+    <button onclick="login()">로그인</button>
+</div>
+
+<div id="join" style="display:none">
+    <input id="joinUsername" placeholder="아이디" />
+    <input id="joinPassword" type="password" placeholder="비밀번호" />
+    <button onclick="join()">회원가입</button>
+</div>
+
+<div id="message"></div>
+
+<script>
+    function showTab(tab) {
+        document.getElementById('login').style.display = tab === 'login' ? 'block' : 'none';
+        document.getElementById('join').style.display = tab === 'join' ? 'block' : 'none';
+        document.querySelectorAll('.tab button').forEach((btn, i) => {
+            btn.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'join' && i === 1));
+        });
+    }
+
+    async function login() {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        const res = await fetch('/member/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (res.ok) {
+            const token = await res.text();
+            localStorage.setItem('token', token);
+            window.location.href = '/board.html';
+        } else {
+            document.getElementById('message').textContent = '로그인 실패! 아이디/비밀번호 확인하세요.';
+        }
+    }
+
+    async function join() {
+        const username = document.getElementById('joinUsername').value;
+        const password = document.getElementById('joinPassword').value;
+
+        const res = await fetch('/member/join', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const msg = await res.text();
+        document.getElementById('message').textContent = msg;
+    }
+</script>
+</body>
+</html>
