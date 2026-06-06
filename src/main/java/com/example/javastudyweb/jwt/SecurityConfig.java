@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/member/join", "/member/login").permitAll()
                         .requestMatchers("/", "/index.html","board.html").permitAll()
+                        .requestMatchers("/comment/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil),

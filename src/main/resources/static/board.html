@@ -84,6 +84,8 @@
             <p>${post.content}</p>
             <button onclick="editPost(${post.id}, '${post.title}', '${post.content}')">수정</button>
             <button onclick="deletePost(${post.id})">삭제</button>
+            <button onclick="toggleComment(${post.id})">💬댓글</button>
+            <div id="comment-${post.id}"></div>
           </div>
         `;
         });
@@ -120,6 +122,28 @@
             body: JSON.stringify({ title, content })
         });
         loadPosts();
+    }
+
+    function toggleComment(postId){
+        const div = document.getElementById('comment-' + postId);
+        if (div.innerHTML === ''){
+            loadComments(postId);
+        }else {
+            div.innerHTML = '';
+        }
+    }
+
+    async function loadComments(postId){
+        const  res = await fetch('/comment/read/' + postId, {
+            headers: { 'Authorization': 'Bearer' + token }
+        });
+        const  comments = await res.json();
+        const div = document.getElementById('comment-' + postId);
+
+        div.innerHTML = '';
+        comments.forEach(comment => {
+            div.innerHTML += `<p>${comment.content} - ${comment.member.username}</p>`;
+        });
     }
 </script>
 </body>

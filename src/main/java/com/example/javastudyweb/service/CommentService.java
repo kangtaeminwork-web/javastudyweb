@@ -29,7 +29,7 @@ public class CommentService {
 
     // 포스트 수정
     @Transactional
-    public Long update(Long id, String content, Post post, Member member){
+    public Long update(Long id, String content, Member member){
         // 1. 데이터 베이스에서 수정할 댓글 조회
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("해당 댓글 존재하지 않음"));
