@@ -31,11 +31,10 @@
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/index.html';
 
-    // 페이지 열리면 글 목록 자동 로드
     loadPosts();
 
     function logout() {
-        if(confirm("정말 로그아웃 하시겠어요?")) {
+        if (confirm("정말 로그아웃 하시겠어요?")) {
             localStorage.removeItem('token');
             window.location.href = '/index.html';
         }
@@ -66,28 +65,27 @@
             headers: { 'Authorization': 'Bearer ' + token }
         });
 
-        if (res.status === 401 || res.status === 403){
+        if (res.status === 401 || res.status === 403) {
             localStorage.removeItem('token');
             window.location.href = '/index.html';
             return;
         }
 
         const posts = await res.json();
-
         const list = document.getElementById('postList');
         list.innerHTML = '';
 
         posts.forEach(post => {
             list.innerHTML += `
-          <div class="post" id="post-${post.id}">
-            <h3>${post.title}</h3>
-            <p>${post.content}</p>
-            <button onclick="editPost(${post.id}, '${post.title}', '${post.content}')">수정</button>
-            <button onclick="deletePost(${post.id})">삭제</button>
-            <button onclick="toggleComment(${post.id})">💬댓글</button>
-            <div id="comment-${post.id}"></div>
-          </div>
-        `;
+                <div class="post" id="post-${post.id}">
+                    <h3>${post.title}</h3>
+                    <p>${post.content}</p>
+                    <button onclick="editPost(${post.id}, '${post.title}', '${post.content}')">수정</button>
+                    <button onclick="deletePost(${post.id})">삭제</button>
+                    <button onclick="toggleComment(${post.id})">💬 댓글</button>
+                    <div id="comment-${post.id}"></div>
+                </div>
+            `;
         });
     }
 
@@ -102,11 +100,11 @@
     function editPost(id, title, content) {
         const postDiv = document.getElementById(`post-${id}`);
         postDiv.innerHTML = `
-        <input id="editTitle-${id}" value="${title}" />
-        <textarea id="editContent-${id}" rows="3">${content}</textarea>
-        <button onclick="updatePost(${id})">저장</button>
-        <button onclick="loadPosts()">취소</button>
-      `;
+            <input id="editTitle-${id}" value="${title}" />
+            <textarea id="editContent-${id}" rows="3">${content}</textarea>
+            <button onclick="updatePost(${id})">저장</button>
+            <button onclick="loadPosts()">취소</button>
+        `;
     }
 
     async function updatePost(id) {
@@ -124,26 +122,80 @@
         loadPosts();
     }
 
-    function toggleComment(postId){
+    function toggleComment(postId) {
         const div = document.getElementById('comment-' + postId);
-        if (div.innerHTML === ''){
+        if (div.innerHTML === '') {
             loadComments(postId);
-        }else {
+        } else {
             div.innerHTML = '';
         }
     }
 
-    async function loadComments(postId){
-        const  res = await fetch('/comment/read/' + postId, {
-            headers: { 'Authorization': 'Bearer' + token }
+    async function loadComments(postId) {
+        const res = await fetch('/comment/read/' + postId, {
+            headers: { 'Authorization': 'Bearer ' + token }
         });
-        const  comments = await res.json();
+        const comments = await res.json();
         const div = document.getElementById('comment-' + postId);
 
         div.innerHTML = '';
         comments.forEach(comment => {
-            div.innerHTML += `<p>${comment.content} - ${comment.member.username}</p>`;
+            div.innerHTML += `
+                <div id="comment-item-${comment.id}">
+                    <p>${comment.content} - ${comment.member.username}</p>
+                    <button onclick="editComment(${comment.id}, '${comment.content}', ${postId})">수정</button>
+                    <button onclick="deleteComment(${comment.id}, ${postId})">삭제</button>
+                </div>
+            `;
         });
+        div.innerHTML += `
+            <input id="commentInput-${postId}" placeholder="댓글을 입력하세요" />
+            <button onclick="writeComment(${postId})">작성</button>
+        `;
+    }
+
+    async function writeComment(postId) {
+        const content = document.getElementById('commentInput-' + postId).value;
+
+        await fetch('/comment/write', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ content, postId })
+        });
+
+        await loadComments(postId);
+    }
+
+    function editComment(commentId, commentContent, postId) {
+        const commentDiv = document.getElementById(`comment-item-${commentId}`);
+        commentDiv.innerHTML = `
+            <input id="editInput-${commentId}" value="${commentContent}" />
+            <button onclick="updateComment(${commentId}, document.getElementById('editInput-${commentId}').value, ${postId})">저장</button>
+            <button onclick="loadComments(${postId})">취소</button>
+        `;
+    }
+
+    async function updateComment(commentId, commentContent, postId) {
+        await fetch('/comment/update/' + commentId, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ content: commentContent })
+        });
+        await loadComments(postId);
+    }
+
+    async function deleteComment(commentId, postId) {
+        await fetch('/comment/delete/' + commentId, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        await loadComments(postId);
     }
 </script>
 </body>
