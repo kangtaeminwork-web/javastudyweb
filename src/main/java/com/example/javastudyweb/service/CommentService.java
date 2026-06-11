@@ -3,6 +3,8 @@ package com.example.javastudyweb.service;
 import com.example.javastudyweb.entity.Comment;
 import com.example.javastudyweb.entity.Member;
 import com.example.javastudyweb.entity.Post;
+import com.example.javastudyweb.exception.CustomException;
+import com.example.javastudyweb.exception.ErrorCode;
 import com.example.javastudyweb.repository.CommentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +34,10 @@ public class CommentService {
     public Long update(Long id, String content, Member member){
         // 1. 데이터 베이스에서 수정할 댓글 조회
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("해당 댓글 존재하지 않음"));
+                .orElseThrow(()->new CustomException(ErrorCode.COMMENT_NOT_FOUND));
         // 2. 수정하려는 댓글의 작성자가 본인인지 확인
         if (!comment.getMember().getId().equals(member.getId())){
-            throw new IllegalArgumentException("당신은 작성자가 아닙니다.");
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
         // 3. 엔티티 객체 내부 매서드를 호출하여 값 변경
         comment.update(content);
@@ -48,10 +50,10 @@ public class CommentService {
     public void delete(Long id, Member member){
         // 1. 데이터 베이스에서 삭제할 댓글 조회
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("해당 댓글은 이미 삭제됨"));
+                .orElseThrow(()-> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
         // 2. 삭제하려는 댓글의 작성자가 본인인지 확인
         if (!comment.getMember().getId().equals(member.getId())){
-            throw new IllegalArgumentException("당신은 작성자가 아닙니다.");
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
         commentRepository.delete(comment);
     }

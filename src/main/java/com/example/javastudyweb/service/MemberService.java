@@ -1,6 +1,8 @@
 package com.example.javastudyweb.service;
 
 import com.example.javastudyweb.entity.Member;
+import com.example.javastudyweb.exception.CustomException;
+import com.example.javastudyweb.exception.ErrorCode;
 import com.example.javastudyweb.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,7 +20,7 @@ public class MemberService {
     public Member join(String username, String password) {
         // 중복 아이디 체크
         memberRepository.findByUsername(username).ifPresent(m -> {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+            throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
         });
 
         String encodedPassword = passwordEncoder.encode(password);
@@ -29,10 +31,10 @@ public class MemberService {
     // 로그인
     public Member login(String username, String password) {
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (!passwordEncoder.matches(password, member.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
 
         return member;

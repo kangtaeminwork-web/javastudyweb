@@ -3,6 +3,8 @@ package com.example.javastudyweb.controller;
 import com.example.javastudyweb.entity.Comment;
 import com.example.javastudyweb.entity.Member;
 import com.example.javastudyweb.entity.Post;
+import com.example.javastudyweb.exception.CustomException;
+import com.example.javastudyweb.exception.ErrorCode;
 import com.example.javastudyweb.repository.MemberRepository;
 import com.example.javastudyweb.repository.PostRepository;
 import com.example.javastudyweb.service.CommentService;
@@ -27,9 +29,9 @@ public class CommentController {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 유저 입니다"));
+                .orElseThrow(()-> new CustomException((ErrorCode.MEMBER_NOT_FOUND)));
         Post post = postRepository.findById(request.getPostId())
-                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 게시글 번호 입니다."));
+                .orElseThrow(()-> new CustomException(ErrorCode.POST_NOT_FOUND));
         commentService.write(request.getContent(),post,member);
         return "댓글 작성 성공";
     }
@@ -37,7 +39,7 @@ public class CommentController {
     @GetMapping("/read/{id}")
     public List<Comment> read(@PathVariable Long id){
         Post post = postRepository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 게시글 번호 입니다."));
+                .orElseThrow(()-> new CustomException(ErrorCode.POST_NOT_FOUND));
         return commentService.getAll(post);
     }
 
@@ -46,7 +48,7 @@ public class CommentController {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 유저 입니다"));
+                .orElseThrow(()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         commentService.update(id, request.getContent(), member);
         return "댓글 수정 성공!";
     }
@@ -56,7 +58,7 @@ public class CommentController {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         Member member = memberRepository.findByUsername(username)
-                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 유저 입니다."));
+                .orElseThrow(()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         commentService.delete(id, member);
         return "댓글 삭제 성공";
     }
