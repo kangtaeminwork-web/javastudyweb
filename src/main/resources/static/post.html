@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>포스트</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; }
+        #postTitle { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        #postContent { border: 1px solid #ddd; padding: 16px; border-radius: 6px; margin-bottom: 20px; line-height: 1.6; }
+        #commentSection { margin-top: 20px; }
+        input { display: block; width: 100%; margin: 6px 0; padding: 8px; box-sizing: border-box; }
+        button { padding: 8px 14px; cursor: pointer; margin-right: 4px; }
+        hr { margin: 20px 0; }
+    </style>
+</head>
+<body>
+<h2> 포스팅 글</h2>
+<div id="postTitle"></div>
+<div id="postContent"></div>
+<div id="commentSection"></div>
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/index.html';
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    loadPostDetail()
+
+    async function loadPostDetail() {
+        const res = await fetch(`/post/${id}`, {
+            headers: {'Authorization': 'Bearer ' + token}
+        });
+
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('token');
+            window.location.href = '/index.html';
+            return;
+        }
+
+        const post = await res.json();
+        document.getElementById('postTitle').textContent = post.title;
+        document.getElementById('postContent').textContent = post.content;
+
+        loadComments(id);
+    }
+
+    // 댓글 기능 -start-
+
+    async function loadComments(postId) {
+        const res = await fetch('/comment/read/' + postId, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const comments = await res.json();
+        const div = document.getElementById('commentSection');
+
+        div.innerHTML = '';
+        comments.forEach(comment => {
+            div.innerHTML += `
+                <div id="comment-item-${comment.id}">
+                    <p>${comment.content} - ${comment.member.username}</p>
+                    <button onclick="editComment(${comment.id}, '${comment.content}', ${postId})">수정</button>
+                    <button onclick="deleteComment(${comment.id}, ${postId})">삭제</button>
+                </div>
+            `;
+        });
+        div.innerHTML += `
+            <input id="commentInput-${postId}" placeholder="댓글을 입력하세요" />
+            <button onclick="writeComment(${postId})">작성</button>
+        `;
+    }
+
+    async function writeComment(postId) {
+        const content = document.getElementById('commentInput-' + postId).value;
+
+        await fetch('/comment/write', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ content, postId })
+        });
+
+        await loadComments(postId);
+    }
+
+    function editComment(commentId, commentContent, postId) {
+        const commentDiv = document.getElementById(`comment-item-${commentId}`);
+        commentDiv.innerHTML = `
+            <input id="editInput-${commentId}" value="${commentContent}" />
+            <button onclick="updateComment(${commentId}, document.getElementById('editInput-${commentId}').value, ${postId})">저장</button>
+            <button onclick="loadComments(${postId})">취소</button>
+        `;
+    }
+
+    async function updateComment(commentId, commentContent, postId) {
+        await fetch('/comment/update/' + commentId, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ content: commentContent })
+        });
+        await loadComments(postId);
+    }
+
+    async function deleteComment(commentId, postId) {
+        await fetch('/comment/delete/' + commentId, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        await loadComments(postId);
+    }
+    // 댓글 기능 -end-
+</script>
+</body>
+</html>

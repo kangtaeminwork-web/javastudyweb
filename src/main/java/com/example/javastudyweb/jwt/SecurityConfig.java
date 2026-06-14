@@ -24,7 +24,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/member/join", "/member/login").permitAll()
-                        .requestMatchers("/", "/index.html","board.html").permitAll()
+                        .requestMatchers("/", "/index.html","board.html","post.html").permitAll()
                         .requestMatchers("/images/**").permitAll()
                         .anyRequest().authenticated()
                 )

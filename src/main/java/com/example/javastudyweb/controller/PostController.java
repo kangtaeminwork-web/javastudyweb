@@ -8,6 +8,7 @@ import com.example.javastudyweb.repository.MemberRepository;
 import com.example.javastudyweb.service.PostService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +56,11 @@ public class PostController {
                 .orElseThrow(()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         postService.delete(id, member);
         return "삭제 성공";
+    }
+    // 단일 포스트 조회 메서드
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPost(@PathVariable Long id){
+        return postService.getPost(id);
     }
 
 

@@ -8,6 +8,7 @@ import com.example.javastudyweb.repository.MemberRepository;
 import com.example.javastudyweb.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -25,6 +26,12 @@ public class PostService {
     // 포스트 조회
     public List<Post> getAll() {
         return postRepository.findAll();
+    }
+
+    // 단일 포스트 조회
+    public ResponseEntity<?> getPost(Long id){
+        Post post = postRepository.findById(id).orElseThrow(()-> new CustomException(ErrorCode.POST_NOT_FOUND));
+        return ResponseEntity.ok(post);
     }
 
     // 포스트 수정
