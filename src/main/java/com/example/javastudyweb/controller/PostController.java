@@ -29,7 +29,7 @@ public class PostController {
         // username으로 Member객체를 DB에서 찾아오는 코드
         Member member = memberRepository.findByUsername(username)
                         .orElseThrow(()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-        postService.write(request.getTitle(), request.getContent(), member);
+        postService.write(request.getTitle(), request.getContent(), member, request.getImageUrl());
         return "글 작성 성공";
     }
 
@@ -62,5 +62,6 @@ public class PostController {
     private static class PostRequest {
         private String title;
         private String content;
+        private String imageUrl;
     }
 }

@@ -18,8 +18,8 @@ public class PostService {
     private final PostRepository postRepository;
 
     // 포스트 생성
-    public Post write(String title, String content, Member member){
-        Post post = new Post(title, content, member);
+    public Post write(String title, String content, Member member, String imageUrl){
+        Post post = new Post(title, content, member, imageUrl);
         return postRepository.save(post);
     }
     // 포스트 조회
@@ -39,7 +39,7 @@ public class PostService {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
         // 3. 엔티티 객체 내부 메서드를 호출하여 값 변경
-        post.update(title, content);
+        post.update(title, content, null);
 
         // 4. 수정된 포스트의 id 반환
         return post.getId();

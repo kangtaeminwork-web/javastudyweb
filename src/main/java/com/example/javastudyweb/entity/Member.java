@@ -19,6 +19,13 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
+    @Column
+    private String profileImageUrl;
+
+    public void updateProfileImage(String profileImageUrl){
+        this.profileImageUrl = profileImageUrl;
+    }
+
     public Member(String username, String password) {
         this.username = username;
         this.password = password;
