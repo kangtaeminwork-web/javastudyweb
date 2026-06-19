@@ -26,6 +26,8 @@ public class SecurityConfig {
                         .requestMatchers("/member/join", "/member/login").permitAll()
                         .requestMatchers("/", "/index.html","board.html","post.html").permitAll()
                         .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/post/**").permitAll()
+                        .requestMatchers("/comment/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil),

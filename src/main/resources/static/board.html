@@ -79,8 +79,6 @@
             list.innerHTML += `
                 <div class="post" id="post-${post.id}">
                     <a href="post.html?id=${post.id}">${post.title}</a>
-                    <button onclick="editPost(${post.id}, '${post.title}', '${post.content}')">수정</button>
-                    <button onclick="deletePost(${post.id})">삭제</button>
                 </div>
             `;
         });
