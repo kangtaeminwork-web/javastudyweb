@@ -14,6 +14,7 @@
 </head>
 <body>
 <h2>📋 게시판</h2>
+<button onclick="window.location.href='mypage.html'">마이페이지</button>
 <button onclick="logout()">로그아웃</button>
 <hr>
 
@@ -84,38 +85,7 @@
         });
     }
 
-    async function deletePost(id) {
-        await fetch(`/post/delete/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        loadPosts();
-    }
 
-    function editPost(id, title, content) {
-        const postDiv = document.getElementById(`post-${id}`);
-        postDiv.innerHTML = `
-            <input id="editTitle-${id}" value="${title}" />
-            <textarea id="editContent-${id}" rows="3">${content}</textarea>
-            <button onclick="updatePost(${id})">저장</button>
-            <button onclick="loadPosts()">취소</button>
-        `;
-    }
-
-    async function updatePost(id) {
-        const title = document.getElementById(`editTitle-${id}`).value;
-        const content = document.getElementById(`editContent-${id}`).value;
-
-        await fetch(`/post/update/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({ title, content })
-        });
-        loadPosts();
-    }
 
 
 </script>

@@ -33,6 +33,10 @@ public class PostService {
         Post post = postRepository.findById(id).orElseThrow(()-> new CustomException(ErrorCode.POST_NOT_FOUND));
         return ResponseEntity.ok(post);
     }
+    // 내가 쓴 포스트만 조회
+    public List<Post> getMyPosts(Member member){
+        return postRepository.findByMember(member);
+    }
 
     // 포스트 수정
     @Transactional

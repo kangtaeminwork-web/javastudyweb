@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Page</title>
+    <style>
+
+    </style>
+</head>
+<body>
+<h2> 마이페이지</h2>
+<div style="display: flex;">
+    <!-- 왼쪽 사이드바 -->
+    <div style="width: 200px;">
+        <ul>
+            <li><a href="board.html">게시판</a></li>
+            <li><a href="#">내가 쓴 글</a></li>
+        </ul>
+    </div>
+
+    <!-- 오른쪽 메인 컨텐츠 -->
+    <div style="flex: 1;">
+        <div id="memberInfo"></div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/index.html';
+
+    async function loadMemberData(){
+
+        const response = await fetch('/member/me', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const memberData = await response.json()
+        const info = document.getElementById('memberInfo');
+        info.innerHTML = '';
+
+
+        info.innerHTML += `
+                <div class="member" id="member-${memberData.id}">
+                    <p>${memberData.id} - ${memberData.username}</p>
+                </div>
+            `;
+    }
+    loadMemberData();
+</script>
+</body>
+</html>

@@ -1,9 +1,15 @@
 package com.example.javastudyweb.controller;
 
+import com.example.javastudyweb.entity.Member;
+import com.example.javastudyweb.exception.CustomException;
+import com.example.javastudyweb.exception.ErrorCode;
 import com.example.javastudyweb.jwt.JwtUtil;
+import com.example.javastudyweb.repository.MemberRepository;
 import com.example.javastudyweb.service.MemberService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/join")
@@ -28,13 +35,32 @@ public class MemberController {
     }
 
     @GetMapping("/me")
-    public String me(@RequestHeader("Authorization") String token) {
-        return "현재 로그인한 사용자: " + token;
+    public ResponseEntity<?> me() {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        return ResponseEntity.ok(new MemberResponse(member));
     }
 
+    // 클라이언트 -> 서버 방향 로그인/회원가입 데이터를 담는 그릇(입력)
     @Getter
     private static class MemberRequest {
         private String username;
         private String password;
+    }
+
+    // 서버->클라이언트 방향. 서버가 유저한테 돌려줄 데이터를 담는 그릇(출력)
+    @Getter
+    private static class MemberResponse {
+        private final Long id;
+        private final String username;
+        private final String profileImageUrl;
+
+        public MemberResponse(Member member){
+            this.id = member.getId();
+            this.username = member.getUsername();
+            this.profileImageUrl = member.getProfileImageUrl();
+        }
     }
 }

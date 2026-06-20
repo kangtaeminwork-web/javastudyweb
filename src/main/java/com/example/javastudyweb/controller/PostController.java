@@ -48,6 +48,7 @@ public class PostController {
         postService.update(id ,request.getTitle(), request.getContent(), member);
         return "글 수정 성공!";
     }
+
     @DeleteMapping("/delete/{id}")
     public String delete(@PathVariable Long id){
         String username = SecurityContextHolder.getContext()
@@ -57,10 +58,22 @@ public class PostController {
         postService.delete(id, member);
         return "삭제 성공";
     }
+
     // 단일 포스트 조회 메서드
     @GetMapping("/{id}")
     public ResponseEntity<?> getPost(@PathVariable Long id){
         return postService.getPost(id);
+    }
+
+    // 내가 쓴 글만 가져오는 api
+    @GetMapping("/my")
+    public List<Post> getMyPosts() {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        return postService.getMyPosts(member);
+
     }
 
 
