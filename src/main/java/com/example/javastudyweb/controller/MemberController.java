@@ -43,6 +43,14 @@ public class MemberController {
         return ResponseEntity.ok(new MemberResponse(member));
     }
 
+    @PutMapping("/password")
+    public ResponseEntity<?> password(@RequestBody PasswordChangeRequest request) {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        memberService.changePassword(username, request.getCurrentPassword(), request.getNewPassword());
+        return ResponseEntity.ok("비밀번호 변경 성공");
+    }
+
     // 클라이언트 -> 서버 방향 로그인/회원가입 데이터를 담는 그릇(입력)
     @Getter
     private static class MemberRequest {
@@ -62,5 +70,12 @@ public class MemberController {
             this.username = member.getUsername();
             this.profileImageUrl = member.getProfileImageUrl();
         }
+    }
+
+    // 현재 비밀번호 + 새 비밀번호 DTO
+    @Getter
+    private static class PasswordChangeRequest {
+        private String currentPassword;
+        private String newPassword;
     }
 }

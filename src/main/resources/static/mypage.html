@@ -4,7 +4,38 @@
     <meta charset="UTF-8">
     <title>My Page</title>
     <style>
-
+        .member-card {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .write-card {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+        .write-card input,
+        .write-card textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .write-card button {
+            margin-top: 8px;
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -14,13 +45,25 @@
     <div style="width: 200px;">
         <ul>
             <li><a href="board.html">게시판</a></li>
-            <li><a href="#">내가 쓴 글</a></li>
+            <li><a href="#" onclick="showWriteForm()">글 작성</a> </li>
+            <li><a href="#" onclick="loadMyPosts()">내가 쓴 글</a></li>
         </ul>
     </div>
 
     <!-- 오른쪽 메인 컨텐츠 -->
-    <div style="flex: 1;">
-        <div id="memberInfo"></div>
+    <div style="flex: 1; max-width: 500px;">
+        <div class="member-card">
+            <div id="memberInfo"></div>
+        </div>
+        <hr>
+        <div class="write-card">
+            <h3>글 작성</h3>
+            <input id="title" placeholder="제목" />
+            <textarea id="content" placeholder="내용" rows="4"></textarea>
+            <button onclick="writePost()">글 올리기</button>
+            <div id="message"></div>
+        </div>
+        <div id="myPostList" style="display:none;"></div>
     </div>
 </div>
 
@@ -40,11 +83,64 @@
 
         info.innerHTML += `
                 <div class="member" id="member-${memberData.id}">
-                    <p>${memberData.id} - ${memberData.username}</p>
+                    <p>유저 번호: ${memberData.id}</p>
+                    <p>유저명: ${memberData.username}</p>
                 </div>
             `;
     }
     loadMemberData();
+
+    async function writePost() {
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+
+        const res = await fetch('/post/write', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ title, content })
+        });
+
+        const msg = await res.text();
+        document.getElementById('message').textContent = msg;
+        document.getElementById('title').value = '';
+        document.getElementById('content').value = '';
+        loadPosts();
+    }
+    async function showWriteForm(){
+        const writeCard = document.querySelector('.write-card');
+        const myPostList = document.getElementById('myPostList')
+        // 보이기
+        writeCard.style.display = 'block';
+        //숨기기
+        myPostList.style.display = 'none';
+    }
+    async function loadMyPosts(){
+        // class는 쿼리셀렉터로
+        const writeCard = document.querySelector('.write-card');
+        const myPostList = document.getElementById('myPostList');
+        // 숨기기
+        writeCard.style.display = 'none';
+        // 보이기
+        myPostList.style.display = 'block';
+
+        const response = await fetch('/post/my', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const myPosts = await response.json()
+
+        myPostList.innerHTML = '';
+
+        myPosts.forEach(posts => {
+            myPostList.innerHTML += `
+            <div class="posts" id="post-${posts.id}">
+                <a href="post.html?id=${posts.id}">${posts.title}</a>
+            </div>
+            `;
+        });
+    }
 </script>
 </body>
 </html>

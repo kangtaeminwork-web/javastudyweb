@@ -17,14 +17,6 @@
 <button onclick="window.location.href='mypage.html'">마이페이지</button>
 <button onclick="logout()">로그아웃</button>
 <hr>
-
-<h3>글 작성</h3>
-<input id="title" placeholder="제목" />
-<textarea id="content" placeholder="내용" rows="4"></textarea>
-<button onclick="writePost()">글 올리기</button>
-<div id="message"></div>
-
-<hr>
 <h3>글 목록</h3>
 <div id="postList"></div>
 
@@ -39,26 +31,6 @@
             localStorage.removeItem('token');
             window.location.href = '/index.html';
         }
-    }
-
-    async function writePost() {
-        const title = document.getElementById('title').value;
-        const content = document.getElementById('content').value;
-
-        const res = await fetch('/post/write', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({ title, content })
-        });
-
-        const msg = await res.text();
-        document.getElementById('message').textContent = msg;
-        document.getElementById('title').value = '';
-        document.getElementById('content').value = '';
-        loadPosts();
     }
 
     async function loadPosts() {

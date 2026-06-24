@@ -39,4 +39,15 @@ public class MemberService {
 
         return member;
     }
+
+    // 비밀번호 변경 로직
+    public void changePassword(String username , String currentPassword, String newPassword) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+        member.updatePassword(passwordEncoder.encode(newPassword));
+        memberRepository.save(member);
+    }
 }
